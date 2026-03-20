@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="PsyAi TTS - Login">
+    <meta name="author" content="PsyAi">
+
+    <title>PsyAi TTS - Login</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+        integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --metallic-purple: #8b5a9f;
+            --dark-purple: #4a2c54;
+            --light-purple: #b388c4;
+            --metallic-shine: linear-gradient(135deg, #8b5a9f 0%, #6b4a7f 50%, #8b5a9f 100%);
+        }
+
+        body {
+            background: var(--black);
+            color: var(--light-purple);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a0a1f 50%, #0a0a0a 100%);
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(139, 90, 159, 0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        #logo-placeholder {
+            width: 300px;
+            height: 300px;
+            background: var(--dark-purple);
+            border: 3px solid var(--metallic-purple);
+            border-radius: 15px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #logo-placeholder::before {
+            content: 'PsyAi';
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--metallic-purple);
+            text-shadow: 0 0 20px rgba(139, 90, 159, 0.8);
+            z-index: 1;
+        }
+
+        #logo-placeholder:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(139, 90, 159, 0.6);
+        }
+
+        #logo-placeholder.clicked {
+            animation: pulse 0.3s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+        }
+
+        #admin-panel {
+            margin-top: 30px;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        #admin-panel.visible {
+            opacity: 1;
+            max-height: 200px;
+        }
+
+        input[type="password"] {
+            background: var(--dark-purple);
+            border: 2px solid var(--metallic-purple);
+            color: var(--light-purple);
+            padding: 12px 20px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--light-purple);
+            box-shadow: 0 0 15px rgba(139, 90, 159, 0.6);
+            background: #5a3a6f;
+        }
+
+        input[type="password"]::placeholder {
+            color: #9a7aaf;
+            opacity: 0.7;
+        }
+
+        button {
+            background: var(--metallic-shine);
+            border: 2px solid var(--metallic-purple);
+            color: #ffffff;
+            padding: 12px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 90, 159, 0.4);
+            width: 100%;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #b388c4 0%, #8b5a9f 50%, #b388c4 100%);
+            box-shadow: 0 6px 20px rgba(139, 90, 159, 0.6);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(139, 90, 159, 0.4);
+        }
+
+        #error-message {
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-top: 15px;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+            min-height: 20px;
+        }
+
+        .click-hint {
+            color: var(--light-purple);
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div id="logo-placeholder"></div>
+        <p class="click-hint">Klicke 3x auf das Logo für Administrator-Zugang</p>
+
+        <div id="admin-panel">
+            <form id="login-form">
+                <input type="password" id="password-input" placeholder="Administrator-Passwort eingeben..." />
+                <button type="submit">Einloggen</button>
+            </form>
+            <p id="error-message"></p>
+        </div>
+    </div>
+
+    <script>
+        let clickCount = 0;
+        let clickTimer = null;
+        const logo = document.getElementById('logo-placeholder');
+        const adminPanel = document.getElementById('admin-panel');
+        const loginForm = document.getElementById('login-form');
+        const passwordInput = document.getElementById('password-input');
+        const errorMessage = document.getElementById('error-message');
+
+        // Triple-click detection on logo
+        logo.addEventListener('click', function() {
+            clickCount++;
+            logo.classList.add('clicked');
+
+            // Remove animation class after animation ends
+            setTimeout(() => {
+                logo.classList.remove('clicked');
+            }, 300);
+
+            // Reset click counter after 1 second of no clicks
+            if (clickTimer) {
+                clearTimeout(clickTimer);
+            }
+
+            clickTimer = setTimeout(() => {
+                clickCount = 0;
+            }, 1000);
+
+            // Show admin panel after 3 clicks
+            if (clickCount === 3) {
+                adminPanel.classList.add('visible');
+                passwordInput.focus();
+                clickCount = 0;
+            }
+        });
+
+        // Handle login form submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const password = passwordInput.value;
+
+            if (!password) {
+                errorMessage.textContent = 'Bitte Passwort eingeben';
+                return;
+            }
+
+            // Send login request to server
+            fetch('/admin/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ password: password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to main app
+                    window.location.href = '/app';
+                } else {
+                    errorMessage.textContent = data.message || 'Falsches Passwort';
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            })
+            .catch(error => {
+                errorMessage.textContent = 'Verbindungsfehler';
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+
+</html>

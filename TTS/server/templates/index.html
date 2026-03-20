@@ -183,6 +183,12 @@
                 <img class="mt-5" src="{{url_for('static', filename='coqui-log-green-TTS.png')}}" align="middle"
                     width="512" />
 
+                <!-- Admin controls -->
+                <div style="position: absolute; top: 70px; right: 20px;">
+                    <button id="change-password-btn" style="padding: 8px 15px; font-size: 14px; margin-right: 10px;">Passwort ändern</button>
+                    <button onclick="location.href = '/admin/logout'" style="padding: 8px 15px; font-size: 14px;">Logout</button>
+                </div>
+
                 <ul class="list-unstyled">
                 </ul>
 
@@ -223,6 +229,18 @@
         </div>
     </div>
 
+    <!-- Password change modal -->
+    <div id="password-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: linear-gradient(180deg, #0a0a0a 0%, #1a0a1f 50%, #0a0a0a 100%); padding: 30px; border-radius: 15px; box-shadow: 0 0 30px rgba(139, 90, 159, 0.5); max-width: 400px;">
+            <h3 style="color: var(--light-purple); margin-bottom: 20px;">Passwort ändern</h3>
+            <input type="password" id="old-password" placeholder="Altes Passwort" style="width: 100%; margin-bottom: 15px; background: var(--dark-purple); border: 2px solid var(--metallic-purple); color: var(--light-purple); padding: 10px; border-radius: 8px;" />
+            <input type="password" id="new-password" placeholder="Neues Passwort (min. 8 Zeichen)" style="width: 100%; margin-bottom: 15px; background: var(--dark-purple); border: 2px solid var(--metallic-purple); color: var(--light-purple); padding: 10px; border-radius: 8px;" />
+            <p id="password-message" style="color: var(--light-purple); min-height: 20px; margin-bottom: 15px;"></p>
+            <button onclick="changePassword()" style="width: 48%; margin-right: 4%;">Ändern</button>
+            <button onclick="closePasswordModal()" style="width: 48%;">Abbrechen</button>
+        </div>
+    </div>
+
     <!-- Bootstrap core JavaScript -->
     <script>
         function getTextValue(textId) {
@@ -233,6 +251,63 @@
             return ""
         }
         function q(selector) { return document.querySelector(selector) }
+
+        // Password change functionality
+        function showPasswordModal() {
+            document.getElementById('password-modal').style.display = 'flex';
+            document.getElementById('old-password').focus();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('password-modal').style.display = 'none';
+            document.getElementById('old-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('password-message').textContent = '';
+        }
+
+        function changePassword() {
+            const oldPassword = document.getElementById('old-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const messageEl = document.getElementById('password-message');
+
+            if (!oldPassword || !newPassword) {
+                messageEl.textContent = 'Bitte beide Felder ausfüllen';
+                messageEl.style.color = '#ff6b6b';
+                return;
+            }
+
+            fetch('/admin/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    old_password: oldPassword,
+                    new_password: newPassword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    messageEl.textContent = data.message;
+                    messageEl.style.color = '#4caf50';
+                    setTimeout(() => {
+                        closePasswordModal();
+                    }, 2000);
+                } else {
+                    messageEl.textContent = data.message;
+                    messageEl.style.color = '#ff6b6b';
+                }
+            })
+            .catch(error => {
+                messageEl.textContent = 'Verbindungsfehler';
+                messageEl.style.color = '#ff6b6b';
+                console.error('Error:', error);
+            });
+        }
+
+        document.getElementById('change-password-btn').addEventListener('click', showPasswordModal);
+
         q('#text').focus()
         function do_tts(e) {
             const text = q('#text').value
