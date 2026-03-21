@@ -172,7 +172,7 @@ def index():
     """Redirect to login page if not authenticated, otherwise show app"""
     if not is_authenticated():
         return redirect(url_for('login'))
-    return redirect(url_for('app'))
+    return redirect(url_for('main_app'))
 
 
 @app.route("/login")
@@ -222,7 +222,7 @@ def change_password():
 
 
 @app.route("/app")
-def app():
+def main_app():
     """Main TTS application (protected)"""
     if not is_authenticated():
         return redirect(url_for('login'))
