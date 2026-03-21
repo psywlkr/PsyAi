@@ -170,3 +170,5 @@ depot/*
 coqui_recipes/*
 local_scripts/*
 coqui_demos/*
+# Admin password file (should be configured per deployment)
+TTS/server/admin_password.txt

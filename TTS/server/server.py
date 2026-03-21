@@ -9,7 +9,7 @@ from threading import Lock
 from typing import Union
 from urllib.parse import parse_qs
 
-from flask import Flask, render_template, render_template_string, request, send_file
+from flask import Flask, render_template, render_template_string, request, send_file, session, redirect, url_for, jsonify
 
 from TTS.config import load_config
 from TTS.utils.manage import ModelManager
@@ -127,6 +127,26 @@ language_manager = getattr(synthesizer.tts_model, "language_manager", None)
 use_gst = synthesizer.tts_config.get("use_gst", False)
 app = Flask(__name__)
 
+# Secret key for session management
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'psyai-tts-secret-key-change-in-production')
+
+# Default admin password - can be changed
+ADMIN_PASSWORD_FILE = Path(__file__).parent / 'admin_password.txt'
+
+def get_admin_password():
+    """Get the current admin password from file or return default"""
+    if ADMIN_PASSWORD_FILE.exists():
+        return ADMIN_PASSWORD_FILE.read_text().strip()
+    return '12345678'
+
+def set_admin_password(new_password):
+    """Set a new admin password"""
+    ADMIN_PASSWORD_FILE.write_text(new_password)
+
+def is_authenticated():
+    """Check if user is authenticated"""
+    return session.get('authenticated', False)
+
 
 def style_wav_uri_to_dict(style_wav: str) -> Union[str, dict]:
     """Transform an uri style_wav, in either a string (path to wav file to be use for style transfer)
@@ -149,6 +169,84 @@ def style_wav_uri_to_dict(style_wav: str) -> Union[str, dict]:
 
 @app.route("/")
 def index():
+    """Redirect to login page if not authenticated, otherwise show app"""
+    if not is_authenticated():
+        return redirect(url_for('login'))
+    return redirect(url_for('main_app'))
+
+
+@app.route("/login")
+def login():
+    """Show login page"""
+    return render_template("login.html")
+
+
+@app.route("/admin/login", methods=["POST"])
+def admin_login():
+    """Handle login authentication"""
+    data = request.get_json()
+    password = data.get('password', '')
+
+    if password == get_admin_password():
+        session['authenticated'] = True
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'message': 'Falsches Passwort'})
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    """Logout user"""
+    session.pop('authenticated', None)
+    return redirect(url_for('login'))
+
+
+@app.route("/admin/change-password", methods=["POST"])
+def change_password():
+    """Change admin password (requires authentication)"""
+    if not is_authenticated():
+        return jsonify({'success': False, 'message': 'Nicht authentifiziert'}), 401
+
+    data = request.get_json()
+    old_password = data.get('old_password', '')
+    new_password = data.get('new_password', '')
+
+    if old_password == get_admin_password():
+        if len(new_password) >= 8:
+            set_admin_password(new_password)
+            return jsonify({'success': True, 'message': 'Passwort erfolgreich geändert'})
+        else:
+            return jsonify({'success': False, 'message': 'Passwort muss mindestens 8 Zeichen lang sein'})
+    else:
+        return jsonify({'success': False, 'message': 'Altes Passwort ist falsch'})
+
+
+@app.route("/download/anleitung")
+def download_anleitung():
+    """Download the complete guide (VOLLSTAENDIGE_ANLEITUNG.md)"""
+    if not is_authenticated():
+        return redirect(url_for('login'))
+
+    # Path to the guide file in the repository root
+    anleitung_path = Path(__file__).parent.parent.parent / 'VOLLSTAENDIGE_ANLEITUNG.md'
+
+    if anleitung_path.exists():
+        return send_file(
+            anleitung_path,
+            as_attachment=True,
+            download_name='PsyAi_TTS_Vollstaendige_Anleitung.md',
+            mimetype='text/markdown'
+        )
+    else:
+        return "Anleitung nicht gefunden", 404
+
+
+@app.route("/app")
+def main_app():
+    """Main TTS application (protected)"""
+    if not is_authenticated():
+        return redirect(url_for('login'))
+
     return render_template(
         "index.html",
         show_details=args.show_details,
