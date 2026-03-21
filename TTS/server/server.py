@@ -221,6 +221,26 @@ def change_password():
         return jsonify({'success': False, 'message': 'Altes Passwort ist falsch'})
 
 
+@app.route("/download/anleitung")
+def download_anleitung():
+    """Download the complete guide (VOLLSTAENDIGE_ANLEITUNG.md)"""
+    if not is_authenticated():
+        return redirect(url_for('login'))
+
+    # Path to the guide file in the repository root
+    anleitung_path = Path(__file__).parent.parent.parent / 'VOLLSTAENDIGE_ANLEITUNG.md'
+
+    if anleitung_path.exists():
+        return send_file(
+            anleitung_path,
+            as_attachment=True,
+            download_name='PsyAi_TTS_Vollstaendige_Anleitung.md',
+            mimetype='text/markdown'
+        )
+    else:
+        return "Anleitung nicht gefunden", 404
+
+
 @app.route("/app")
 def main_app():
     """Main TTS application (protected)"""
