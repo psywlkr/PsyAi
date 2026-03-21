@@ -1,4 +1,19 @@
 
+## 📥 Deutsche Dokumentation / German Documentation
+
+**[⬇️ Vollständige Anleitung herunterladen (Download Complete Guide)](https://github.com/psywlkr/PsyAi/raw/refs/heads/claude/review-app-functionalities/VOLLSTAENDIGE_ANLEITUNG.md)**
+
+Weitere Dokumentation:
+- [VOLLSTAENDIGE_ANLEITUNG.md](VOLLSTAENDIGE_ANLEITUNG.md) - Komplette Installations- und Nutzungsanleitung
+- [FUNKTIONSANALYSE.md](FUNKTIONSANALYSE.md) - Vollständige Funktionsübersicht
+- [LOGIN_SYSTEM.md](LOGIN_SYSTEM.md) - Login-System Dokumentation
+- [UI_DESIGN.md](UI_DESIGN.md) - UI Design und Farbschema
+- [SERVER_START.md](SERVER_START.md) - Server-Start Anleitung
+- [UI_SCREENSHOTS.md](UI_SCREENSHOTS.md) - UI Visualisierungen
+- [BUGFIX_LOGIN.md](BUGFIX_LOGIN.md) - Bug Fix Dokumentation
+
+______________________________________________________________________
+
 ## 🐸Coqui.ai News
 - 📣 ⓍTTSv2 is here with 16 languages and better performance across the board.
 - 📣 ⓍTTS fine-tuning code is out. Check the [example recipes](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech).
